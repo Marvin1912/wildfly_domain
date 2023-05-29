@@ -835,7 +835,7 @@
             <subsystem xmlns="urn:wildfly:microprofile-config-smallrye:2.0"/>
             <subsystem xmlns="urn:wildfly:microprofile-jwt-smallrye:1.0"/>
             <subsystem xmlns="urn:jboss:domain:modcluster:6.0">
-                <proxy name="default" advertise-socket="modcluster" listener="ajp">
+                <proxy name="default" advertise="false" advertise-socket="modcluster" listener="ajp" proxies="dc">
                     <dynamic-load-provider>
                         <load-metric type="cpu"/>
                     </dynamic-load-provider>
@@ -1911,7 +1911,9 @@
         <interface name="private">
             <inet-address value="${jboss.bind.address.private:127.0.0.1}"/>
         </interface>
-        <interface name="public"/>
+	<interface name="public">
+	    <inet-address value="127.0.0.1"/>
+	</interface>	
         <interface name="unsecure">
             <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>
         </interface>
@@ -1971,16 +1973,25 @@
             <socket-binding name="txn-status-manager" port="4713"/>
             <outbound-socket-binding name="mail-smtp">
                 <remote-destination host="${jboss.mail.server.host:localhost}" port="${jboss.mail.server.port:25}"/>
-            </outbound-socket-binding>
+	</outbound-socket-binding>
+        <outbound-socket-binding name="dc">
+                <remote-destination host="domain-controller" port="8090"/>
+        </outbound-socket-binding>
         </socket-binding-group>
         <socket-binding-group name="load-balancer-sockets" default-interface="public">
             <socket-binding name="http" port="${jboss.http.port:8080}"/>
             <socket-binding name="https" port="${jboss.https.port:8443}"/>
             <socket-binding name="mcmp-management" interface="private" port="${jboss.mcmp.port:8090}"/>
-            <socket-binding name="modcluster" interface="private" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
+            <socket-binding name="modcluster" interface="public" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
         </socket-binding-group>
     </socket-binding-groups>
     <server-groups>
+	<server-group name="balancer-group" profile="load-balancer">
+            <jvm name="default">
+                <heap size="64m" max-size="512m"/>
+            </jvm>
+            <socket-binding-group ref="load-balancer-sockets"/>
+        </server-group>	
         <server-group name="main-server-group" profile="full-ha">
             <jvm name="default">
                 <heap size="64m" max-size="512m"/>

@@ -6,6 +6,9 @@
         <extension module="org.wildfly.extension.core-management"/>
         <extension module="org.wildfly.extension.elytron"/>
     </extensions>
+    <system-properties>
+        <property name="server.name" value="host-1"/>
+    </system-properties>
     <management>
         <audit-log>
             <formatters>
@@ -56,7 +59,7 @@
     </jvms>
     <servers>
         <server name="server-one" group="main-server-group">
-            <socket-bindings port-offset="1"/>
+            <socket-bindings port-offset="0"/>
         </server>
     </servers>
     <profile>
