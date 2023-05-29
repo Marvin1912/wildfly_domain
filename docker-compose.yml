@@ -1,0 +1,78 @@
+version: "3.8"
+services:
+  db:
+    image: "postgres:latest"
+    container_name: "postgres"
+    environment:
+      POSTGRES_USER: "marvin"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "wildfly_domain"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    restart: "unless-stopped"
+
+  domain-controller:
+    image: quay.io/wildfly/wildfly:28.0.1.Final-jdk17
+    container_name: "domain-controller"  
+    environment:
+      POSTGRES_USER: "marvin"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "wildfly_domain"
+      POSTGRES_HOST: postgres
+    ports:
+      - "8081:8080"
+      - "9991:9990"
+    command: >
+      sh -c "/opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent &&
+             /opt/jboss/wildfly/bin/domain.sh -bmanagement 0.0.0.0"
+    volumes:
+      - /vagrant/domain_controller/domain/configuration/host.xml:/opt/jboss/wildfly/domain/configuration/host.xml
+      - /vagrant/domain_controller/domain/configuration/domain.xml:/opt/jboss/wildfly/domain/configuration/domain.xml  
+    depends_on:
+      - db
+
+  host-1:
+    image: quay.io/wildfly/wildfly:28.0.1.Final-jdk17
+    container_name: "host-1"
+    environment:
+      POSTGRES_USER: "marvin"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "wildfly_domain"
+      POSTGRES_HOST: postgres
+    ports:
+      - "8082:8080"
+      - "9992:9990"
+    command: >
+      sh -c "/opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent &&
+             /opt/jboss/wildfly/bin/domain.sh -bmanagement 0.0.0.0" 
+    volumes:
+      - /vagrant/host-1/domain/configuration/host.xml:/opt/jboss/wildfly/domain/configuration/host.xml
+    depends_on:
+      - db
+      - domain-controller  
+
+  host-2:
+    image: quay.io/wildfly/wildfly:28.0.1.Final-jdk17
+    container_name: "host-2"
+    environment:
+      POSTGRES_USER: "marvin"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "wildfly_domain"
+      POSTGRES_HOST: postgres
+    ports:
+      - "8083:8080"
+      - "9993:9990"
+    command: >
+      sh -c "/opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent &&
+             /opt/jboss/wildfly/bin/domain.sh -bmanagement 0.0.0.0"
+    volumes:
+      - /vagrant/host-2/domain/configuration/host.xml:/opt/jboss/wildfly/domain/configuration/host.xml
+    depends_on:
+      - db
+      - domain-controller  
+
+volumes:
+  postgres_data:
+
