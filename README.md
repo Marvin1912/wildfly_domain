@@ -12,5 +12,7 @@ Features:
 - High Availability: Shows how to enable high availability features and failover mechanisms in a WildFly Domain setup.
 - Management and Monitoring: Provides examples of managing and monitoring the domain using WildFly management tools and interfaces.
 
+Furthermore, this repository serves to lay the foundation for a home application. The basic infrastructure is represented via the following architecture description.
+
 ![Infrastructure](Infrastruktur.png?raw=true "Infrastructure")
 
