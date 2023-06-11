@@ -1,4 +1,4 @@
-# wildfly_domain
+# Home Application with a WildFly Domain
 This GitHub repository provides a comprehensive example of configuring a WildFly Domain. 
 
 It includes the necessary configuration files and scripts to set up a WildFly Domain environment, showcasing the distributed architecture and management capabilities of WildFly.
