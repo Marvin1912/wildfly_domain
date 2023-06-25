@@ -1400,9 +1400,27 @@
                             <password>sa</password>
                         </security>
                     </datasource>
+                    <datasource jndi-name="java:jboss/datasources/PostGreDS" pool-name="PostgrePool" enabled="true" use-java-context="true">
+                        <connection-url>jdbc:postgresql://postgres:5432/wildfly_domain</connection-url>
+                        <driver-class>org.postgresql.Driver</driver-class>
+                        <driver>postgresql</driver>
+                        <security>
+                            <user-name>marvin</user-name>
+                            <password>password</password>
+                        </security>
+                        <validation>
+                            <background-validation>true</background-validation>
+                            <background-validation-millis>60000</background-validation-millis>
+                            <check-valid-connection-sql>select 1</check-valid-connection-sql>
+                        </validation>
+                    </datasource>
                     <drivers>
                         <driver name="h2" module="com.h2database.h2">
                             <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+                        </driver>
+                        <driver name="postgresql" module="org.postgresql">
+                            <driver-class>org.postgresql.Driver</driver-class>
+                            <xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
                         </driver>
                     </drivers>
                 </datasources>
