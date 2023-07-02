@@ -29,3 +29,6 @@ replay_pid*
 # IntelliJ
 .idea
 wildfly_domain.iml
+
+# draw.io
+*.bkp
