@@ -90,20 +90,21 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  broker:
+  kafka-broker:
     image: confluentinc/cp-server:7.4.0
-    hostname: broker
-    container_name: broker
+    hostname: kafka-broker
+    container_name: kafka-broker
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
       - "9101:9101"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -112,9 +113,27 @@ services:
       KAFKA_JMX_HOSTNAME: localhost
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka-broker:29092
       CONFLUENT_METRICS_ENABLE: 'false'
     command: sh -c "sleep 30s && /etc/confluent/docker/run"
+
+  kafka-init:
+    image: confluentinc/cp-server:7.4.0
+    container_name: kafka-init
+    depends_on:
+      - kafka-broker
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka-broker:29092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka-broker:29092 --create --if-not-exists --topic com.marvin.costs.monthly --replication-factor 1 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka-broker:29092 --list
+      "
 
   consul-server:
     image: hashicorp/consul:1.16
