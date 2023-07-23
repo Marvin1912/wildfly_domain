@@ -1409,9 +1409,9 @@
                             <password>password</password>
                         </security>
                         <validation>
+                            <check-valid-connection-sql>select 1</check-valid-connection-sql>
                             <background-validation>true</background-validation>
                             <background-validation-millis>60000</background-validation-millis>
-                            <check-valid-connection-sql>select 1</check-valid-connection-sql>
                         </validation>
                     </datasource>
                     <drivers>
@@ -1596,14 +1596,23 @@
                             <implementation type="JKS"/>
                             <file path="application.keystore" relative-to="jboss.domain.config.dir"/>
                         </key-store>
+                        <key-store name="domainKS">
+                            <credential-reference clear-text="secret"/>
+                            <implementation type="JKS"/>
+                            <file path="server.keystore" relative-to="jboss.domain.config.dir"/>
+                        </key-store>
                     </key-stores>
                     <key-managers>
                         <key-manager name="applicationKM" key-store="applicationKS" generate-self-signed-certificate-host="localhost">
                             <credential-reference clear-text="password"/>
                         </key-manager>
+                        <key-manager name="domainKM" key-store="domainKS">
+                            <credential-reference clear-text="secret"/>
+                        </key-manager>
                     </key-managers>
                     <server-ssl-contexts>
                         <server-ssl-context name="applicationSSC" key-manager="applicationKM"/>
+                        <server-ssl-context name="domainSSLContext" protocols="TLSv1.2 TLSv1.3" key-manager="domainKM"/>
                     </server-ssl-contexts>
                 </tls>
             </subsystem>
@@ -1765,6 +1774,9 @@
                     </security-setting>
                     <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10" redistribution-delay="1000"/>
                     <http-connector name="http-connector" socket-binding="http" endpoint="http-acceptor"/>
+                    <http-connector name="https-connector" socket-binding="https" endpoint="https-acceptor">
+                        <param name="ssl-enabled" value="true"/>
+                    </http-connector>
                     <http-connector name="http-connector-throughput" socket-binding="http" endpoint="http-acceptor-throughput">
                         <param name="batch-delay" value="50"/>
                     </http-connector>
@@ -1772,6 +1784,7 @@
                         <param name="buffer-pooling" value="false"/>
                     </in-vm-connector>
                     <http-acceptor name="http-acceptor" http-listener="default"/>
+                    <http-acceptor name="https-acceptor" http-listener="https"/>
                     <http-acceptor name="http-acceptor-throughput" http-listener="default">
                         <param name="batch-delay" value="50"/>
                         <param name="direct-deliver" value="false"/>
@@ -1784,8 +1797,9 @@
                     <cluster-connection name="my-cluster" address="jms" connector-name="http-connector" discovery-group="dg-group1"/>
                     <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                     <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
+                    <jms-queue name="jms.queue.ExampleQueue" entries="java:/jms/queue/exampleQueue java:jboss/exported/jms/queue/exampleQueue"/>
                     <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
-                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector" ha="true" block-on-acknowledge="true" reconnect-attempts="-1"/>
+                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector" ha="true" block-on-acknowledge="true" reconnect-attempts="-1"/>
                     <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
                 </server>
             </subsystem>
@@ -1804,6 +1818,7 @@
             <subsystem xmlns="urn:jboss:domain:pojo:1.0"/>
             <subsystem xmlns="urn:jboss:domain:remoting:5.0">
                 <http-connector name="http-remoting-connector" connector-ref="default" sasl-authentication-factory="application-sasl-authentication"/>
+                <http-connector name="https-remoting-connector" connector-ref="https" sasl-authentication-factory="application-sasl-authentication"/>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:request-controller:1.0"/>
             <subsystem xmlns="urn:jboss:domain:resource-adapters:6.1"/>
@@ -1838,7 +1853,7 @@
                 <server name="default-server">
                     <ajp-listener name="ajp" socket-binding="ajp"/>
                     <http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true"/>
-                    <https-listener name="https" socket-binding="https" ssl-context="applicationSSC" enable-http2="true"/>
+                    <https-listener name="https" socket-binding="https" ssl-context="domainSSLContext" enable-http2="true"/>
                     <host name="default-host" alias="localhost">
                         <location name="/" handler="welcome-content"/>
                         <http-invoker http-authentication-factory="application-http-authentication"/>
@@ -1929,9 +1944,9 @@
         <interface name="private">
             <inet-address value="${jboss.bind.address.private:127.0.0.1}"/>
         </interface>
-	<interface name="public">
-	    <inet-address value="127.0.0.1"/>
-	</interface>	
+        <interface name="public">
+            <inet-address value="127.0.0.1"/>
+        </interface>
         <interface name="unsecure">
             <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>
         </interface>
@@ -1989,12 +2004,12 @@
             <socket-binding name="modcluster" multicast-address="${jboss.modcluster.multicast.address:224.0.1.105}" multicast-port="23364"/>
             <socket-binding name="txn-recovery-environment" port="4712"/>
             <socket-binding name="txn-status-manager" port="4713"/>
+            <outbound-socket-binding name="dc">
+                <remote-destination host="domain-controller" port="8090"/>
+            </outbound-socket-binding>
             <outbound-socket-binding name="mail-smtp">
                 <remote-destination host="${jboss.mail.server.host:localhost}" port="${jboss.mail.server.port:25}"/>
-	</outbound-socket-binding>
-        <outbound-socket-binding name="dc">
-                <remote-destination host="domain-controller" port="8090"/>
-        </outbound-socket-binding>
+            </outbound-socket-binding>
         </socket-binding-group>
         <socket-binding-group name="load-balancer-sockets" default-interface="public">
             <socket-binding name="http" port="${jboss.http.port:8080}"/>
@@ -2004,12 +2019,12 @@
         </socket-binding-group>
     </socket-binding-groups>
     <server-groups>
-	<server-group name="balancer-group" profile="load-balancer">
+        <server-group name="balancer-group" profile="load-balancer">
             <jvm name="default">
                 <heap size="64m" max-size="512m"/>
             </jvm>
             <socket-binding-group ref="load-balancer-sockets"/>
-        </server-group>	
+        </server-group>
         <server-group name="main-server-group" profile="full-ha">
             <jvm name="default">
                 <heap size="64m" max-size="512m"/>

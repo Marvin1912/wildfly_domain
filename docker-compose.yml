@@ -16,6 +16,7 @@ services:
   domain-controller:
     image: quay.io/wildfly/wildfly:28.0.1.Final-jdk17
     container_name: "domain-controller"
+    hostname: "domain-controller"
     environment:
       POSTGRES_USER: "marvin"
       POSTGRES_PASSWORD: "password"
@@ -26,12 +27,15 @@ services:
       - "9991:9990"
     command: >
       sh -c "/opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent &&
+             /opt/jboss/wildfly/bin/add-user.sh -ds -a -g guest -u jms-import -p password --silent &&
              cp /opt/jboss/tmp/host.xml /opt/jboss/wildfly/domain/configuration/host.xml &&
              cp /opt/jboss/tmp/domain.xml /opt/jboss/wildfly/domain/configuration/domain.xml &&
+             cp /opt/jboss/tmp/certs/server.keystore /opt/jboss/wildfly/domain/configuration &&
              /opt/jboss/wildfly/bin/domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0 -bprivate $(hostname -i)"
     volumes:
       - ./domain_controller/domain/configuration/host.xml:/opt/jboss/tmp/host.xml
       - ./domain_controller/domain/configuration/domain.xml:/opt/jboss/tmp/domain.xml
+      - ./certs:/opt/jboss/tmp/certs
       - ./domain_controller/modules/org/postgresql:/opt/jboss/wildfly/modules/org/postgresql/main
     depends_on:
       - db
@@ -39,6 +43,7 @@ services:
   host-1:
     image: quay.io/wildfly/wildfly:28.0.1.Final-jdk17
     container_name: "host-1"
+    hostname: "host-1"
     environment:
       POSTGRES_USER: "marvin"
       POSTGRES_PASSWORD: "password"
@@ -46,13 +51,17 @@ services:
       POSTGRES_HOST: postgres
     ports:
       - "8082:8080"
+      - "8443:8443"
       - "9992:9990"
     command: >
       sh -c "/opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent &&
+             /opt/jboss/wildfly/bin/add-user.sh -ds -a -g guest -u jms-import -p password --silent &&
              cp /opt/jboss/tmp/host.xml /opt/jboss/wildfly/domain/configuration/host.xml &&
+             cp /opt/jboss/tmp/certs/server.keystore /opt/jboss/wildfly/domain/configuration &&
              /opt/jboss/wildfly/bin/domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0 -bprivate $(hostname -i)"
     volumes:
       - ./host-1/domain/configuration/host.xml:/opt/jboss/tmp/host.xml
+      - ./certs:/opt/jboss/tmp/certs
       - ./domain_controller/modules/org/postgresql:/opt/jboss/wildfly/modules/org/postgresql/main
     depends_on:
       - db
@@ -61,6 +70,7 @@ services:
   host-2:
     image: quay.io/wildfly/wildfly:28.0.1.Final-jdk17
     container_name: "host-2"
+    hostname: "host-2"
     environment:
       POSTGRES_USER: "marvin"
       POSTGRES_PASSWORD: "password"
@@ -68,13 +78,17 @@ services:
       POSTGRES_HOST: postgres
     ports:
       - "8083:8080"
+      - "8444:8443"
       - "9993:9990"
     command: >
       sh -c "/opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent &&
+             /opt/jboss/wildfly/bin/add-user.sh -ds -a -g guest -u jms-import -p password --silent &&
              cp /opt/jboss/tmp/host.xml /opt/jboss/wildfly/domain/configuration/host.xml &&
+             cp /opt/jboss/tmp/certs/server.keystore /opt/jboss/wildfly/domain/configuration &&
              /opt/jboss/wildfly/bin/domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0 -bprivate $(hostname -i)"
     volumes:
       - ./host-2/domain/configuration/host.xml:/opt/jboss/tmp/host.xml
+      - ./certs:/opt/jboss/tmp/certs
       - ./domain_controller/modules/org/postgresql:/opt/jboss/wildfly/modules/org/postgresql/main
     depends_on:
       - db
@@ -159,4 +173,3 @@ services:
 
 volumes:
   postgres_data:
-
