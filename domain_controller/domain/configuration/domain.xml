@@ -1920,12 +1920,122 @@
             <subsystem xmlns="urn:jboss:domain:io:3.0">
                 <worker name="default"/>
             </subsystem>
+            <subsystem xmlns="urn:wildfly:elytron:17.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
+                <providers>
+                    <aggregate-providers name="combined-providers">
+                        <providers name="elytron"/>
+                        <providers name="openssl"/>
+                    </aggregate-providers>
+                    <provider-loader name="elytron" module="org.wildfly.security.elytron"/>
+                    <provider-loader name="openssl" module="org.wildfly.openssl"/>
+                </providers>
+                <audit-logging>
+                    <file-audit-log name="local-audit" path="audit.log" relative-to="jboss.server.log.dir" format="JSON"/>
+                </audit-logging>
+                <security-domains>
+                    <security-domain name="ApplicationDomain" default-realm="ApplicationRealm" permission-mapper="default-permission-mapper">
+                        <realm name="ApplicationRealm" role-decoder="groups-to-roles"/>
+                    </security-domain>
+                </security-domains>
+                <security-realms>
+                    <identity-realm name="local" identity="$local"/>
+                    <properties-realm name="ApplicationRealm">
+                        <users-properties path="application-users.properties" relative-to="jboss.domain.config.dir" digest-realm-name="ApplicationRealm"/>
+                        <groups-properties path="application-roles.properties" relative-to="jboss.domain.config.dir"/>
+                    </properties-realm>
+                </security-realms>
+                <mappers>
+                    <simple-permission-mapper name="default-permission-mapper" mapping-mode="first">
+                        <permission-mapping>
+                            <principal name="anonymous"/>
+                            <permission-set name="default-permissions"/>
+                        </permission-mapping>
+                        <permission-mapping match-all="true">
+                            <permission-set name="login-permission"/>
+                            <permission-set name="default-permissions"/>
+                        </permission-mapping>
+                    </simple-permission-mapper>
+                    <constant-realm-mapper name="local" realm-name="local"/>
+                    <simple-role-decoder name="groups-to-roles" attribute="groups"/>
+                    <constant-role-mapper name="super-user-mapper">
+                        <role name="SuperUser"/>
+                    </constant-role-mapper>
+                </mappers>
+                <permission-sets>
+                    <permission-set name="login-permission">
+                        <permission class-name="org.wildfly.security.auth.permission.LoginPermission"/>
+                    </permission-set>
+                    <permission-set name="default-permissions">
+                        <permission class-name="org.wildfly.extension.batch.jberet.deployment.BatchPermission" module="org.wildfly.extension.batch.jberet" target-name="*"/>
+                        <permission class-name="org.wildfly.transaction.client.RemoteTransactionPermission" module="org.wildfly.transaction.client"/>
+                        <permission class-name="org.jboss.ejb.client.RemoteEJBPermission" module="org.jboss.ejb-client"/>
+                    </permission-set>
+                </permission-sets>
+                <http>
+                    <http-authentication-factory name="application-http-authentication" security-domain="ApplicationDomain" http-server-mechanism-factory="global">
+                        <mechanism-configuration>
+                            <mechanism mechanism-name="BASIC">
+                                <mechanism-realm realm-name="ApplicationRealm"/>
+                            </mechanism>
+                        </mechanism-configuration>
+                    </http-authentication-factory>
+                    <provider-http-server-mechanism-factory name="global"/>
+                </http>
+                <sasl>
+                    <sasl-authentication-factory name="application-sasl-authentication" sasl-server-factory="configured" security-domain="ApplicationDomain">
+                        <mechanism-configuration>
+                            <mechanism mechanism-name="JBOSS-LOCAL-USER" realm-mapper="local"/>
+                            <mechanism mechanism-name="DIGEST-MD5">
+                                <mechanism-realm realm-name="ApplicationRealm"/>
+                            </mechanism>
+                        </mechanism-configuration>
+                    </sasl-authentication-factory>
+                    <configurable-sasl-server-factory name="configured" sasl-server-factory="elytron">
+                        <properties>
+                            <property name="wildfly.sasl.local-user.default-user" value="$local"/>
+                            <property name="wildfly.sasl.local-user.challenge-path" value="${jboss.server.temp.dir}/auth"/>
+                        </properties>
+                    </configurable-sasl-server-factory>
+                    <mechanism-provider-filtering-sasl-server-factory name="elytron" sasl-server-factory="global">
+                        <filters>
+                            <filter provider-name="WildFlyElytron"/>
+                        </filters>
+                    </mechanism-provider-filtering-sasl-server-factory>
+                    <provider-sasl-server-factory name="global"/>
+                </sasl>
+                <tls>
+                    <key-stores>
+                        <key-store name="applicationKS">
+                            <credential-reference clear-text="password"/>
+                            <implementation type="JKS"/>
+                            <file path="application.keystore" relative-to="jboss.domain.config.dir"/>
+                        </key-store>
+                        <key-store name="domainKS">
+                            <credential-reference clear-text="secret"/>
+                            <implementation type="JKS"/>
+                            <file path="server.keystore" relative-to="jboss.domain.config.dir"/>
+                        </key-store>
+                    </key-stores>
+                    <key-managers>
+                        <key-manager name="applicationKM" key-store="applicationKS" generate-self-signed-certificate-host="localhost">
+                            <credential-reference clear-text="password"/>
+                        </key-manager>
+                        <key-manager name="domainKM" key-store="domainKS">
+                            <credential-reference clear-text="secret"/>
+                        </key-manager>
+                    </key-managers>
+                    <server-ssl-contexts>
+                        <server-ssl-context name="applicationSSC" key-manager="applicationKM"/>
+                        <server-ssl-context name="domainSSLContext" protocols="TLSv1.2 TLSv1.3" key-manager="domainKM"/>
+                    </server-ssl-contexts>
+                </tls>
+            </subsystem>
             <subsystem xmlns="urn:jboss:domain:undertow:14.0" default-virtual-host="default-host" default-servlet-container="default" default-server="default-server" statistics-enabled="${wildfly.undertow.statistics-enabled:${wildfly.statistics-enabled:false}}">
                 <byte-buffer-pool name="default"/>
                 <buffer-cache name="default"/>
                 <server name="default-server">
-                    <http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true"/>
                     <http-listener name="management" socket-binding="mcmp-management" enable-http2="true"/>
+                    <https-listener name="https" socket-binding="https" ssl-context="domainSSLContext" enable-http2="true"/>
                     <host name="default-host" alias="localhost">
                         <filter-ref name="load-balancer"/>
                     </host>
