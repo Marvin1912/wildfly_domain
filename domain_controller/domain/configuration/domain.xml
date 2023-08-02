@@ -1797,7 +1797,7 @@
                     <cluster-connection name="my-cluster" address="jms" connector-name="http-connector" discovery-group="dg-group1"/>
                     <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                     <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
-                    <jms-queue name="jms.queue.ExampleQueue" entries="java:/jms/queue/exampleQueue java:jboss/exported/jms/queue/exampleQueue"/>
+                    <jms-queue name="jms.queue.costs.monthly" entries="java:/jms/queue/costs/monthly java:jboss/exported/jms/queue/costs/monthly"/>
                     <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
                     <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector" ha="true" block-on-acknowledge="true" reconnect-attempts="-1"/>
                     <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
