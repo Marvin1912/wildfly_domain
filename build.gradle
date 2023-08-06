@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'com.bmuschko.docker-remote-api' version '9.3.2'
+}
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+def createDockerBuildImageTask(String taskName, String dockerfilePath, String imageName) {
+    tasks.create(taskName, DockerBuildImage) {
+        doFirst {
+            println('Building ' + taskName)
+        }
+        inputDir = file("$project.rootDir/docker_files")
+        dockerFile = file("$project.rootDir/docker_files/$dockerfilePath")
+        images = [imageName]
+    }
+}
+
+tasks.create('buildDockerImages') {
+    dependsOn createDockerBuildImageTask('domainControllerImage', 'domain_controller/Dockerfile', 'domain-controller:3.0'),
+            createDockerBuildImageTask('hostOneImage', 'host_1/Dockerfile', 'host-1:3.0'),
+            createDockerBuildImageTask('hostTwoImage', 'host_2/Dockerfile', 'host-2:3.0')
+
+}
