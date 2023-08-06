@@ -58,7 +58,7 @@
         </jvm>
     </jvms>
     <servers>
-	<server name="domain-controller" group="balancer-group" auto-start="true"/>
+	    <server name="domain-controller" group="balancer-group" auto-start="true"/>
     </servers>    
     <profile>
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
