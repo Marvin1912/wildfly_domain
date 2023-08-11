@@ -37,3 +37,4 @@ wildfly_domain.iml
 
 # Gradle
 .gradle/
+build/
