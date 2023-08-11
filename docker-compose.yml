@@ -15,7 +15,7 @@ services:
     restart: "unless-stopped"
 
   domain-controller:
-    image: domain-controller:latest
+    image: localhost:5000/domain-controller:latest
     container_name: "domain-controller"
     hostname: "domain-controller"
     environment:
@@ -31,7 +31,7 @@ services:
       - db
 
   host-1:
-    image: host-1:latest
+    image: localhost:5000/host-1:latest
     container_name: "host-1"
     hostname: "host-1"
     environment:
@@ -46,7 +46,7 @@ services:
       - domain-controller
 
   host-2:
-    image: host-2:latest
+    image: localhost:5000/host-2:latest
     container_name: "host-2"
     hostname: "host-2"
     environment:
