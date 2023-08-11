@@ -167,6 +167,13 @@ services:
       - ./consul/certs/:/consul/config/certs/:ro
     command: "agent"
     restart: "unless-stopped"
+  
+  registry:
+    image: registry:2
+    container_name: registry
+    ports:
+      - 5000:5000  
+    restart: always  
 
 volumes:
   postgres_data:
