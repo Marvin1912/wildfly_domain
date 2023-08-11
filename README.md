@@ -33,3 +33,13 @@ the certificate.
 
 #### JVM Import
 - sudo bin/keytool -import -file ~/workspace/wildfly_domain/certs/server.crt -alias wildfly_domain -keystore lib/security/cacerts
+
+### Local Docker Registry
+A local Docker registry runs on the server so that the images can be quickly distributed within the network. In order for the builds and pushes to work towards the insecure registry (no TLS), the following must be added to the respective system.
+<pre>
+/etc/docker/daemon.json
+
+{
+    "insecure-registries" : ["&lt;host&gt;:&lt;port&gt;"]
+}
+</pre>
