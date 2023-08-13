@@ -12,7 +12,7 @@ services:
       - "postgres_data:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
-    restart: "unless-stopped"
+    restart: unless-stopped
 
   domain-controller:
     image: localhost:5000/domain-controller:latest
@@ -27,6 +27,7 @@ services:
       - "8081:8080"
       - "8443:8443"
       - "9991:9990"
+    restart: unless-stopped
     depends_on:
       - db
 
@@ -41,6 +42,7 @@ services:
       POSTGRES_HOST: postgres
     ports:
       - "8444:8444"
+    restart: unless-stopped
     depends_on:
       - db
       - domain-controller
@@ -56,6 +58,7 @@ services:
       POSTGRES_HOST: postgres
     ports:
       - "8445:8445"
+    restart: unless-stopped
     depends_on:
       - db
       - domain-controller
@@ -135,14 +138,14 @@ services:
       - ./consul/client.json:/consul/config/client.json:ro
       - ./consul/certs/:/consul/config/certs/:ro
     command: "agent"
-    restart: "unless-stopped"
+    restart: unless-stopped
   
   registry:
     image: registry:2
     container_name: registry
     ports:
-      - 5000:5000  
-    restart: always  
+      - "5000:5000"
+    restart: unless-stopped
 
 volumes:
   postgres_data:
