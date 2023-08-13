@@ -1346,7 +1346,7 @@
             <subsystem xmlns="urn:jboss:domain:logging:8.0">
                 <periodic-rotating-file-handler name="FILE" autoflush="true">
                     <formatter>
-                        <named-formatter name="PATTERN"/>
+                        <named-formatter name="JsonFormatter"/>
                     </formatter>
                     <file relative-to="jboss.server.log.dir" path="server.log"/>
                     <suffix value=".yyyy-MM-dd"/>
@@ -1375,6 +1375,22 @@
                 </formatter>
                 <formatter name="COLOR-PATTERN">
                     <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+                </formatter>
+                <formatter name="JsonFormatter">
+                    <custom-formatter module="biz.paluch.logging" class="biz.paluch.logging.gelf.wildfly.WildFlyJsonFormatter">
+                        <properties>
+                            <property name="version" value="1.0" />
+                            <property name="facility" value="logstash-gelf" />
+                            <property name="fields" value="Time,Severity,ThreadName,SourceClassName,SourceMethodName,SourceSimpleClassName,LoggerName,NDC" />
+                            <property name="extractStackTrace" value="true" />
+                            <property name="filterStackTrace" value="true" />
+                            <property name="includeLogMessageParameters" value="true" />
+                            <property name="includeLocation" value="true" />
+                            <property name="mdcProfiling" value="true" />
+                            <property name="timestampPattern" value="yyyy-MM-dd HH:mm:ss,SSS" />
+                            <property name="includeFullMdc" value="true" />
+                        </properties>
+                    </custom-formatter>
                 </formatter>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:batch-jberet:3.0">
@@ -1886,35 +1902,33 @@
             <subsystem xmlns="urn:jboss:domain:logging:8.0">
                 <periodic-rotating-file-handler name="FILE" autoflush="true">
                     <formatter>
-                        <named-formatter name="PATTERN"/>
+                        <named-formatter name="JsonFormatter"/>
                     </formatter>
                     <file relative-to="jboss.server.log.dir" path="server.log"/>
                     <suffix value=".yyyy-MM-dd"/>
                     <append value="true"/>
                 </periodic-rotating-file-handler>
-                <logger category="com.arjuna">
-                    <level name="WARN"/>
-                </logger>
-                <logger category="io.jaegertracing.Configuration">
-                    <level name="WARN"/>
-                </logger>
-                <logger category="org.jboss.as.config">
-                    <level name="DEBUG"/>
-                </logger>
-                <logger category="sun.rmi">
-                    <level name="WARN"/>
-                </logger>
                 <root-logger>
                     <level name="INFO"/>
                     <handlers>
                         <handler name="FILE"/>
                     </handlers>
                 </root-logger>
-                <formatter name="PATTERN">
-                    <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
-                </formatter>
-                <formatter name="COLOR-PATTERN">
-                    <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
+                <formatter name="JsonFormatter">
+                    <custom-formatter module="biz.paluch.logging" class="biz.paluch.logging.gelf.wildfly.WildFlyJsonFormatter">
+                        <properties>
+                            <property name="version" value="1.0" />
+                            <property name="facility" value="logstash-gelf" />
+                            <property name="fields" value="Time,Severity,ThreadName,SourceClassName,SourceMethodName,SourceSimpleClassName,LoggerName" />
+                            <property name="extractStackTrace" value="true" />
+                            <property name="filterStackTrace" value="true" />
+                            <property name="includeLogMessageParameters" value="true" />
+                            <property name="includeLocation" value="true" />
+                            <property name="mdcProfiling" value="true" />
+                            <property name="timestampPattern" value="yyyy-MM-dd HH:mm:ss,SSS" />
+                            <property name="includeFullMdc" value="true" />
+                        </properties>
+                    </custom-formatter>
                 </formatter>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:io:3.0">

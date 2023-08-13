@@ -4,7 +4,9 @@ COPY certs/server.keystore /opt/jboss/wildfly/domain/configuration
 
 COPY domain_controller/domain.xml /opt/jboss/wildfly/domain/configuration/domain.xml
 COPY domain_controller/host.xml /opt/jboss/wildfly/domain/configuration/host.xml
+
 COPY modules/postgresql /opt/jboss/wildfly/modules/org/postgresql/main
+COPY modules/logging /opt/jboss/wildfly/modules/biz/paluch/logging/main
 
 COPY startup.sh /opt/jboss/startup.sh
 
