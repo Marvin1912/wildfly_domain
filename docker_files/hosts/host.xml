@@ -1,14 +1,11 @@
 <?xml version="1.0" ?>
 
-<host xmlns="urn:jboss:domain:20.0" name="host-2">
+<host xmlns="urn:jboss:domain:20.0">
     <extensions>
         <extension module="org.jboss.as.jmx"/>
         <extension module="org.wildfly.extension.core-management"/>
         <extension module="org.wildfly.extension.elytron"/>
     </extensions>
-    <system-properties>
-        <property name="server.name" value="host-2"/>
-    </system-properties>
     <management>
         <audit-log>
             <formatters>
@@ -58,7 +55,7 @@
         </jvm>
     </jvms>
     <servers>
-        <server name="server-two" group="main-server-group">
+        <server name="server" group="main-server-group">
             <socket-bindings port-offset="0"/>
         </server>
     </servers>
