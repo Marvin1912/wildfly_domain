@@ -10,7 +10,7 @@ COPY startup.sh /opt/jboss/startup.sh
 
 USER root
 
-#RUN yum update -y && yum install -y vim less
+RUN yum update -y && yum install -y vim less
 
 RUN chmod +x /opt/jboss/startup.sh
 

@@ -24,8 +24,8 @@ def createDockerBuildImageTask(String taskName, String dockerfilePath, String im
 
 tasks.create('buildDockerImages') {
     dependsOn createDockerBuildImageTask('domainControllerBuild', 'domain_controller/Dockerfile', "domain-controller:$version_domain_controller"),
-            createDockerBuildImageTask('hostOneBuild', 'host_1/Dockerfile', "host-1:$version_host_1"),
-            createDockerBuildImageTask('hostTwoBuild', 'host_2/Dockerfile', "host-2:$version_host_2")
+            createDockerBuildImageTask('hostOneBuild', 'hosts/host_1/Dockerfile', "host-1:$version_host_1"),
+            createDockerBuildImageTask('hostTwoBuild', 'hosts/host_2/Dockerfile', "host-2:$version_host_2")
 
 }
 
