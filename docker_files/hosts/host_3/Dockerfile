@@ -15,9 +15,9 @@ RUN chmod +x /opt/jboss/startup.sh
 
 USER jboss
 
-ENV HTTPS_PORT 8445
-ENV JBOSS_HOST_NAME host-2
-ENV SERVER_GROUP web-server-group
+ENV HTTPS_PORT 8446
+ENV JBOSS_HOST_NAME host-3
+ENV SERVER_GROUP jms-server-group
 
 RUN /opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent
 RUN /opt/jboss/wildfly/bin/add-user.sh -ds -a -g guest -u jms-import -p password --silent
