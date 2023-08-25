@@ -960,17 +960,24 @@
             <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
             <subsystem xmlns="urn:jboss:domain:datasources:7.0">
                 <datasources>
-                    <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true" statistics-enabled="${wildfly.datasources.statistics-enabled:${wildfly.statistics-enabled:false}}">
-                        <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=${wildfly.h2.compatibility.mode:REGULAR}</connection-url>
-                        <driver>h2</driver>
+                    <datasource jndi-name="java:jboss/datasources/PostGreDS" pool-name="PostgrePool" enabled="true" use-java-context="true">
+                        <connection-url>jdbc:postgresql://postgres:5432/wildfly_domain</connection-url>
+                        <driver-class>org.postgresql.Driver</driver-class>
+                        <driver>postgresql</driver>
                         <security>
-                            <user-name>sa</user-name>
-                            <password>sa</password>
+                            <user-name>marvin</user-name>
+                            <password>password</password>
                         </security>
+                        <validation>
+                            <check-valid-connection-sql>select 1</check-valid-connection-sql>
+                            <background-validation>true</background-validation>
+                            <background-validation-millis>60000</background-validation-millis>
+                        </validation>
                     </datasource>
                     <drivers>
-                        <driver name="h2" module="com.h2database.h2">
-                            <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+                        <driver name="postgresql" module="org.postgresql">
+                            <driver-class>org.postgresql.Driver</driver-class>
+                            <xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
                         </driver>
                     </drivers>
                 </datasources>
@@ -1005,7 +1012,7 @@
                         <managed-scheduled-executor-service name="default" jndi-name="java:jboss/ee/concurrency/scheduler/default" context-service="default" hung-task-termination-period="0" hung-task-threshold="60000" keepalive-time="3000"/>
                     </managed-scheduled-executor-services>
                 </concurrent>
-                <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:jboss/datasources/ExampleDS" jms-connection-factory="java:jboss/DefaultJMSConnectionFactory" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
+                <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:jboss/datasources/PostGreDS" jms-connection-factory="java:jboss/DefaultJMSConnectionFactory" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:ee-security:1.0"/>
             <subsystem xmlns="urn:jboss:domain:ejb3:10.0">
@@ -1252,12 +1259,16 @@
             <subsystem xmlns="urn:jboss:domain:messaging-activemq:15.0">
                 <server name="default">
                     <security elytron-domain="ApplicationDomain"/>
+                    <cluster password="${jboss.messaging.cluster.password:CHANGE ME!!}"/>
                     <statistics enabled="${wildfly.messaging-activemq.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
                     <security-setting name="#">
                         <role name="guest" send="true" consume="true" create-non-durable-queue="true" delete-non-durable-queue="true"/>
                     </security-setting>
-                    <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10"/>
+                    <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10" redistribution-delay="1000"/>
                     <http-connector name="http-connector" socket-binding="http" endpoint="http-acceptor"/>
+                    <http-connector name="https-connector" socket-binding="https" endpoint="https-acceptor">
+                        <param name="ssl-enabled" value="true"/>
+                    </http-connector>
                     <http-connector name="http-connector-throughput" socket-binding="http" endpoint="http-acceptor-throughput">
                         <param name="batch-delay" value="50"/>
                     </http-connector>
@@ -1265,6 +1276,7 @@
                         <param name="buffer-pooling" value="false"/>
                     </in-vm-connector>
                     <http-acceptor name="http-acceptor" http-listener="default"/>
+                    <http-acceptor name="https-acceptor" http-listener="https"/>
                     <http-acceptor name="http-acceptor-throughput" http-listener="default">
                         <param name="batch-delay" value="50"/>
                         <param name="direct-deliver" value="false"/>
@@ -1272,10 +1284,15 @@
                     <in-vm-acceptor name="in-vm" server-id="0">
                         <param name="buffer-pooling" value="false"/>
                     </in-vm-acceptor>
+                    <jgroups-broadcast-group name="bg-group1" jgroups-cluster="activemq-cluster" connectors="http-connector"/>
+                    <jgroups-discovery-group name="dg-group1" jgroups-cluster="activemq-cluster"/>
+                    <cluster-connection name="my-cluster" address="jms" connector-name="http-connector" discovery-group="dg-group1"/>
                     <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                     <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
+                    <jms-queue name="jms.queue.costs.import.monthly" entries="java:/jms/queue/costs/import/monthly java:jboss/exported/jms/queue/costs/import/monthly"/>
+                    <jms-queue name="jms.queue.costs.export.monthly" entries="java:/jms/queue/costs/export/monthly java:jboss/exported/jms/queue/costs/export/monthly"/>
                     <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
-                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector"/>
+                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector" ha="true" block-on-acknowledge="true" reconnect-attempts="-1"/>
                     <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
                 </server>
             </subsystem>
@@ -1392,14 +1409,6 @@
             <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
             <subsystem xmlns="urn:jboss:domain:datasources:7.0">
                 <datasources>
-                    <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true" statistics-enabled="${wildfly.datasources.statistics-enabled:${wildfly.statistics-enabled:false}}">
-                        <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=${wildfly.h2.compatibility.mode:REGULAR}</connection-url>
-                        <driver>h2</driver>
-                        <security>
-                            <user-name>sa</user-name>
-                            <password>sa</password>
-                        </security>
-                    </datasource>
                     <datasource jndi-name="java:jboss/datasources/PostGreDS" pool-name="PostgrePool" enabled="true" use-java-context="true">
                         <connection-url>jdbc:postgresql://postgres:5432/wildfly_domain</connection-url>
                         <driver-class>org.postgresql.Driver</driver-class>
@@ -1415,9 +1424,6 @@
                         </validation>
                     </datasource>
                     <drivers>
-                        <driver name="h2" module="com.h2database.h2">
-                            <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
-                        </driver>
                         <driver name="postgresql" module="org.postgresql">
                             <driver-class>org.postgresql.Driver</driver-class>
                             <xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
@@ -1455,7 +1461,7 @@
                         <managed-scheduled-executor-service name="default" jndi-name="java:jboss/ee/concurrency/scheduler/default" context-service="default" hung-task-termination-period="0" hung-task-threshold="60000" keepalive-time="3000"/>
                     </managed-scheduled-executor-services>
                 </concurrent>
-                <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:jboss/datasources/ExampleDS" jms-connection-factory="java:jboss/DefaultJMSConnectionFactory" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
+                <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:jboss/datasources/PostGreDS" jms-connection-factory="java:jboss/DefaultJMSConnectionFactory" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:ee-security:1.0"/>
             <subsystem xmlns="urn:jboss:domain:ejb3:10.0">
@@ -1764,46 +1770,6 @@
                     <smtp-server outbound-socket-binding-ref="mail-smtp"/>
                 </mail-session>
             </subsystem>
-            <subsystem xmlns="urn:jboss:domain:messaging-activemq:15.0">
-                <server name="default">
-                    <security elytron-domain="ApplicationDomain"/>
-                    <cluster password="${jboss.messaging.cluster.password:CHANGE ME!!}"/>
-                    <statistics enabled="${wildfly.messaging-activemq.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
-                    <security-setting name="#">
-                        <role name="guest" send="true" consume="true" create-non-durable-queue="true" delete-non-durable-queue="true"/>
-                    </security-setting>
-                    <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10" redistribution-delay="1000"/>
-                    <http-connector name="http-connector" socket-binding="http" endpoint="http-acceptor"/>
-                    <http-connector name="https-connector" socket-binding="https" endpoint="https-acceptor">
-                        <param name="ssl-enabled" value="true"/>
-                    </http-connector>
-                    <http-connector name="http-connector-throughput" socket-binding="http" endpoint="http-acceptor-throughput">
-                        <param name="batch-delay" value="50"/>
-                    </http-connector>
-                    <in-vm-connector name="in-vm" server-id="0">
-                        <param name="buffer-pooling" value="false"/>
-                    </in-vm-connector>
-                    <http-acceptor name="http-acceptor" http-listener="default"/>
-                    <http-acceptor name="https-acceptor" http-listener="https"/>
-                    <http-acceptor name="http-acceptor-throughput" http-listener="default">
-                        <param name="batch-delay" value="50"/>
-                        <param name="direct-deliver" value="false"/>
-                    </http-acceptor>
-                    <in-vm-acceptor name="in-vm" server-id="0">
-                        <param name="buffer-pooling" value="false"/>
-                    </in-vm-acceptor>
-                    <jgroups-broadcast-group name="bg-group1" jgroups-cluster="activemq-cluster" connectors="http-connector"/>
-                    <jgroups-discovery-group name="dg-group1" jgroups-cluster="activemq-cluster"/>
-                    <cluster-connection name="my-cluster" address="jms" connector-name="http-connector" discovery-group="dg-group1"/>
-                    <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
-                    <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
-                    <jms-queue name="jms.queue.costs.import.monthly" entries="java:/jms/queue/costs/import/monthly java:jboss/exported/jms/queue/costs/import/monthly"/>
-                    <jms-queue name="jms.queue.costs.export.monthly" entries="java:/jms/queue/costs/export/monthly java:jboss/exported/jms/queue/costs/export/monthly"/>
-                    <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
-                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector" ha="true" block-on-acknowledge="true" reconnect-attempts="-1"/>
-                    <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
-                </server>
-            </subsystem>
             <subsystem xmlns="urn:wildfly:microprofile-config-smallrye:2.0"/>
             <subsystem xmlns="urn:wildfly:microprofile-jwt-smallrye:1.0"/>
             <subsystem xmlns="urn:jboss:domain:modcluster:6.0">
@@ -2097,6 +2063,9 @@
             <socket-binding name="iiop-ssl" interface="unsecure" port="3529"/>
             <socket-binding name="txn-recovery-environment" port="4712"/>
             <socket-binding name="txn-status-manager" port="4713"/>
+            <outbound-socket-binding name="dc">
+                <remote-destination host="domain-controller" port="8090"/>
+            </outbound-socket-binding>
             <outbound-socket-binding name="mail-smtp">
                 <remote-destination host="${jboss.mail.server.host:localhost}" port="${jboss.mail.server.port:25}"/>
             </outbound-socket-binding>
@@ -2132,15 +2101,21 @@
     <server-groups>
         <server-group name="balancer-group" profile="load-balancer">
             <jvm name="default">
-                <heap size="64m" max-size="512m"/>
+                <heap size="64m" max-size="1024m"/>
             </jvm>
             <socket-binding-group ref="load-balancer-sockets"/>
         </server-group>
-        <server-group name="main-server-group" profile="full-ha">
+        <server-group name="web-server-group" profile="full-ha">
             <jvm name="default">
-                <heap size="64m" max-size="512m"/>
+                <heap size="64m" max-size="1024m"/>
             </jvm>
             <socket-binding-group ref="full-ha-sockets"/>
+        </server-group>
+        <server-group name="jms-server-group" profile="full">
+            <jvm name="default">
+                <heap size="64m" max-size="1024m"/>
+            </jvm>
+            <socket-binding-group ref="full-sockets"/>
         </server-group>
     </server-groups>
     <host-excludes>

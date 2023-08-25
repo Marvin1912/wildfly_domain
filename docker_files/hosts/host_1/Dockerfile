@@ -17,6 +17,7 @@ USER jboss
 
 ENV HTTPS_PORT 8444
 ENV JBOSS_HOST_NAME host-1
+ENV SERVER_GROUP web-server-group
 
 RUN /opt/jboss/wildfly/bin/add-user.sh -ds -m -u admin -p admin --silent
 RUN /opt/jboss/wildfly/bin/add-user.sh -ds -a -g guest -u jms-import -p password --silent

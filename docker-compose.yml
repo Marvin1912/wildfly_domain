@@ -63,6 +63,22 @@ services:
       - db
       - domain-controller
 
+  host-3:
+    image: localhost:5000/host-3:latest
+    container_name: "host-3"
+    hostname: "host-3"
+    environment:
+      POSTGRES_USER: "marvin"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "wildfly_domain"
+      POSTGRES_HOST: postgres
+    ports:
+      - "8446:8446"
+    restart: unless-stopped
+    depends_on:
+      - db
+      - domain-controller
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     hostname: zookeeper

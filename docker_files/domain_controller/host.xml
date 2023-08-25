@@ -58,8 +58,8 @@
         </jvm>
     </jvms>
     <servers>
-	    <server name="domain-controller" group="balancer-group" auto-start="true"/>
-    </servers>    
+	    <server name="domain-controller" group="###REPLACE_SERVER_GROUP###" auto-start="true"/>
+    </servers>
     <profile>
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:wildfly:elytron:16.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">

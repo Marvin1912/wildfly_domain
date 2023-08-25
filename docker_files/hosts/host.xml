@@ -55,7 +55,7 @@
         </jvm>
     </jvms>
     <servers>
-        <server name="server" group="main-server-group">
+        <server name="server" group="###REPLACE_SERVER_GROUP###">
             <socket-bindings port-offset="0"/>
         </server>
     </servers>
