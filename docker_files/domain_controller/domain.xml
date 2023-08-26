@@ -1153,14 +1153,23 @@
                             <implementation type="JKS"/>
                             <file path="application.keystore" relative-to="jboss.domain.config.dir"/>
                         </key-store>
+                        <key-store name="domainKS">
+                            <credential-reference clear-text="secret"/>
+                            <implementation type="JKS"/>
+                            <file path="server.keystore" relative-to="jboss.domain.config.dir"/>
+                        </key-store>
                     </key-stores>
                     <key-managers>
                         <key-manager name="applicationKM" key-store="applicationKS" generate-self-signed-certificate-host="localhost">
                             <credential-reference clear-text="password"/>
                         </key-manager>
+                        <key-manager name="domainKM" key-store="domainKS">
+                            <credential-reference clear-text="secret"/>
+                        </key-manager>
                     </key-managers>
                     <server-ssl-contexts>
                         <server-ssl-context name="applicationSSC" key-manager="applicationKM"/>
+                        <server-ssl-context name="domainSSLContext" protocols="TLSv1.2 TLSv1.3" key-manager="domainKM"/>
                     </server-ssl-contexts>
                 </tls>
             </subsystem>
@@ -1259,7 +1268,6 @@
             <subsystem xmlns="urn:jboss:domain:messaging-activemq:15.0">
                 <server name="default">
                     <security elytron-domain="ApplicationDomain"/>
-                    <cluster password="${jboss.messaging.cluster.password:CHANGE ME!!}"/>
                     <statistics enabled="${wildfly.messaging-activemq.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
                     <security-setting name="#">
                         <role name="guest" send="true" consume="true" create-non-durable-queue="true" delete-non-durable-queue="true"/>
@@ -1284,15 +1292,12 @@
                     <in-vm-acceptor name="in-vm" server-id="0">
                         <param name="buffer-pooling" value="false"/>
                     </in-vm-acceptor>
-                    <jgroups-broadcast-group name="bg-group1" jgroups-cluster="activemq-cluster" connectors="http-connector"/>
-                    <jgroups-discovery-group name="dg-group1" jgroups-cluster="activemq-cluster"/>
-                    <cluster-connection name="my-cluster" address="jms" connector-name="http-connector" discovery-group="dg-group1"/>
                     <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                     <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
                     <jms-queue name="jms.queue.costs.import.monthly" entries="java:/jms/queue/costs/import/monthly java:jboss/exported/jms/queue/costs/import/monthly"/>
                     <jms-queue name="jms.queue.costs.export.monthly" entries="java:/jms/queue/costs/export/monthly java:jboss/exported/jms/queue/costs/export/monthly"/>
                     <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
-                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector" ha="true" block-on-acknowledge="true" reconnect-attempts="-1"/>
+                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector"/>
                     <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
                 </server>
             </subsystem>
@@ -1304,6 +1309,7 @@
             <subsystem xmlns="urn:jboss:domain:pojo:1.0"/>
             <subsystem xmlns="urn:jboss:domain:remoting:5.0">
                 <http-connector name="http-remoting-connector" connector-ref="default" sasl-authentication-factory="application-sasl-authentication"/>
+                <http-connector name="https-remoting-connector" connector-ref="https" sasl-authentication-factory="application-sasl-authentication"/>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:request-controller:1.0"/>
             <subsystem xmlns="urn:jboss:domain:resource-adapters:6.1"/>
@@ -1330,7 +1336,7 @@
                 <buffer-cache name="default"/>
                 <server name="default-server">
                     <http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true"/>
-                    <https-listener name="https" socket-binding="https" ssl-context="applicationSSC" enable-http2="true"/>
+                    <https-listener name="https" socket-binding="https" ssl-context="domainSSLContext" enable-http2="true"/>
                     <host name="default-host" alias="localhost">
                         <location name="/" handler="welcome-content"/>
                         <http-invoker http-authentication-factory="application-http-authentication"/>

@@ -28,11 +28,17 @@ the certificate.
 <red>_The certificate is purely for testing and does not contain any sensitive information._</red>
 
 #### Creation
-- keytool -genkeypair -alias wildfly_domain -keyalg RSA -keysize 2048 -validity 365 -keystore server.keystore -dname "cn=Server Administrator,o=mgeitner,c=DE" -keypass secret -storepass secret -ext SAN=dns:host-1,dns:host-2
+- keytool -genkeypair -alias wildfly_domain -keyalg RSA -keysize 2048 -validity 365 -keystore server.keystore -dname "cn=Server Administrator,o=mgeitner,c=DE" -keypass secret -storepass secret -ext SAN=dns:host-1,dns:host-2,dns:host-3
 - keytool -export -alias wildfly_domain -file server.crt -keystore server.keystore -storepass secret
 
-#### JVM Import
+#### JVM Deletion / Import
+- sudo bin/keytool -delete -alias wildfly_domain -keystore lib/security/cacerts
 - sudo bin/keytool -import -file ~/workspace/wildfly_domain/certs/server.crt -alias wildfly_domain -keystore lib/security/cacerts
+
+#### Check the validity of the certificate
+- openssl x509 -inform der -in server.crt -out server.pem
+- openssl x509 -in server.pem -text -noout
+- Certificate -> Data -> Validity
 
 ### Local Docker Registry
 A local Docker registry runs on the server so that the images can be quickly distributed within the network. In order for the builds and pushes to work towards the insecure registry (no TLS), the following must be added to the respective system.
@@ -42,4 +48,33 @@ A local Docker registry runs on the server so that the images can be quickly dis
 {
     "insecure-registries" : ["&lt;host&gt;:&lt;port&gt;"]
 }
+</pre>
+
+## Misc
+If following exception occurs, a possible solution can be found at following link:
+https://stackoverflow.com/questions/56580375/tls-ssl-with-wildfly-16-0-0-final-and-ejb-client-fails-with-org-xnio-http-upgrad
+
+<pre>
+Caused by: org.xnio.http.UpgradeFailedException: Invalid response code 200
+	at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:471) ~[xnio-api-3.8.9.Final.jar:3.8.9.Final]
+	at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400) ~[xnio-api-3.8.9.Final.jar:3.8.9.Final]
+	at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92) ~[xnio-api-3.8.9.Final.jar:3.8.9.Final]
+	at org.xnio.conduits.ReadReadyHandler$ChannelListenerHandler.readReady(ReadReadyHandler.java:66) ~[xnio-api-3.8.9.Final.jar:3.8.9.Final]
+	at org.xnio.nio.NioSocketConduit.handleReady(NioSocketConduit.java:89) ~[xnio-nio-3.8.9.Final.jar:3.8.9.Final]
+	at org.xnio.nio.WorkerThread.run(WorkerThread.java:591) ~[xnio-nio-3.8.9.Final.jar:3.8.9.Final]
+	at ...asynchronous invocation...(Unknown Source) ~[na:na]
+	at org.jboss.remoting3.EndpointImpl.connect(EndpointImpl.java:600) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.jboss.remoting3.EndpointImpl.connect(EndpointImpl.java:565) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.jboss.remoting3.ConnectionInfo$None.getConnection(ConnectionInfo.java:82) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.jboss.remoting3.ConnectionInfo.getConnection(ConnectionInfo.java:55) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.jboss.remoting3.EndpointImpl.doGetConnection(EndpointImpl.java:499) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.jboss.remoting3.EndpointImpl.getConnectedIdentity(EndpointImpl.java:445) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.jboss.remoting3.UncloseableEndpoint.getConnectedIdentity(UncloseableEndpoint.java:52) ~[jboss-remoting-5.0.27.Final.jar:5.0.27.Final]
+	at org.wildfly.naming.client.remote.RemoteNamingProvider.getFuturePeerIdentityPrivileged(RemoteNamingProvider.java:151) ~[wildfly-naming-client-2.0.0.Final.jar:2.0.0.Final]
+	at org.wildfly.naming.client.remote.RemoteNamingProvider.lambda$getFuturePeerIdentity$0(RemoteNamingProvider.java:138) ~[wildfly-naming-client-2.0.0.Final.jar:2.0.0.Final]
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:318) ~[na:na]
+	at org.wildfly.naming.client.remote.RemoteNamingProvider.getFuturePeerIdentity(RemoteNamingProvider.java:138) ~[wildfly-naming-client-2.0.0.Final.jar:2.0.0.Final]
+	at org.wildfly.naming.client.remote.RemoteNamingProvider.getPeerIdentity(RemoteNamingProvider.java:126) ~[wildfly-naming-client-2.0.0.Final.jar:2.0.0.Final]
+	at org.wildfly.naming.client.remote.RemoteNamingProvider.getPeerIdentityForNaming(RemoteNamingProvider.java:106) ~[wildfly-naming-client-2.0.0.Final.jar:2.0.0.Final]
+	... 76 common frames omitted
 </pre>
