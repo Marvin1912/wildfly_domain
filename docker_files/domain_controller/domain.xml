@@ -1296,8 +1296,10 @@
                     <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
                     <jms-queue name="jms.queue.costs.import.monthly" entries="java:/jms/queue/costs/import/monthly java:jboss/exported/jms/queue/costs/import/monthly"/>
                     <jms-queue name="jms.queue.costs.import.special" entries="java:/jms/queue/costs/import/special java:jboss/exported/jms/queue/costs/import/special"/>
+                    <jms-queue name="jms.queue.costs.import.salary" entries="java:/jms/queue/costs/import/salary java:jboss/exported/jms/queue/costs/import/salary"/>
                     <jms-queue name="jms.queue.costs.export.monthly" entries="java:/jms/queue/costs/export/monthly java:jboss/exported/jms/queue/costs/export/monthly"/>
                     <jms-queue name="jms.queue.costs.export.special" entries="java:/jms/queue/costs/export/special java:jboss/exported/jms/queue/costs/export/special"/>
+                    <jms-queue name="jms.queue.costs.export.salary" entries="java:/jms/queue/costs/export/salary java:jboss/exported/jms/queue/costs/export/salary"/>
                     <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
                     <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="https-connector"/>
                     <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
