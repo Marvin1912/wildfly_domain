@@ -1,7 +1,3 @@
-<style>
-red { color: red }
-</style>
-
 # Home Application with a WildFly Domain
 This GitHub repository provides a comprehensive example of configuring a WildFly Domain. 
 
@@ -25,7 +21,7 @@ To be able to establish connections via TLS, a certificate was created. The cert
 and stored in the local JVM in the cacerts keystore as a test. Below are the commands that were used to create/import
 the certificate.
 
-<red>_The certificate is purely for testing and does not contain any sensitive information._</red>
+_The certificate is purely for testing and does not contain any sensitive information._
 
 #### Creation
 - keytool -genkeypair -alias wildfly_domain -keyalg RSA -keysize 2048 -validity 365 -keystore server.keystore -dname "cn=Server Administrator,o=mgeitner,c=DE" -keypass secret -storepass secret -ext SAN=dns:host-1,dns:host-2,dns:host-3
