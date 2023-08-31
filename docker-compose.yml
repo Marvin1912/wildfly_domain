@@ -181,6 +181,13 @@ services:
       - influxdb_data:/var/lib/influxdb
     restart: unless-stopped
 
+  adapter_application:
+    image: localhost:5000/adapter_application:latest
+    container_name: adapter_application
+    hostname: adapter_application
+    ports:
+      - "9001:9001"
+    restart: unless-stopped
 
 volumes:
   postgres_data:

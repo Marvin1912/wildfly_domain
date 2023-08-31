@@ -19,7 +19,7 @@ def createDockerBuildImageTask(String taskName, String dockerfilePath, String im
     tasks.create(taskName, DockerBuildImage) {
         inputDir = file("$project.rootDir/docker_files")
         dockerFile = file("$project.rootDir/docker_files/$dockerfilePath")
-        images = [registry + '/' + imageName]
+        images = ([registry + '/' + imageName])
     }
 }
 
