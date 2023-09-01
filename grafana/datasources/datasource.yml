@@ -1,0 +1,13 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: wildfly_domain
+      defaultBucket: costs
+      tlsSkipVerify: true
+    secureJsonData:
+      token: x5fqphPd3FsegObAaLRKMjEAAGncJrNgjDsTuvV_BprnRxdm7K4tcTLhjORKtLlmvCXCsR2UnIieQme81U06fg== 

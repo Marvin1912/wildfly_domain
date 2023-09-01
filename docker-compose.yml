@@ -181,6 +181,21 @@ services:
       - influxdb_data:/var/lib/influxdb
     restart: unless-stopped
 
+  grafana:
+    image: grafana/grafana-oss:10.1.1
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: marvin
+      GF_SECURITY_ADMIN_PASSWORD: password
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources/:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - influxdb
+
   adapter_application:
     image: localhost:5000/adapter_application:latest
     container_name: adapter_application
@@ -192,3 +207,4 @@ services:
 volumes:
   postgres_data:
   influxdb_data:
+  grafana_data:
