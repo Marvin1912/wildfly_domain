@@ -27,7 +27,8 @@ _The certificate is purely for testing and does not contain any sensitive inform
 - keytool -genkeypair -alias wildfly_domain -keyalg RSA -keysize 2048 -validity 365 -keystore server.keystore -dname "cn=Server Administrator,o=mgeitner,c=DE" -keypass secret -storepass secret -ext SAN=dns:host-1,dns:host-2,dns:host-3
 - keytool -export -alias wildfly_domain -file server.crt -keystore server.keystore -storepass secret
 
-#### JVM Deletion / Import
+#### JVM Listing / Deletion / Import
+- sudo bin/keytool -list -v -alias wildfly_domain -keystore lib/security/cacerts
 - sudo bin/keytool -delete -alias wildfly_domain -keystore lib/security/cacerts
 - sudo bin/keytool -import -file ~/workspace/wildfly_domain/certs/server.crt -alias wildfly_domain -keystore lib/security/cacerts
 

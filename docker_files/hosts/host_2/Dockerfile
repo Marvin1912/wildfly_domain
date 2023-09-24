@@ -1,6 +1,7 @@
 FROM quay.io/wildfly/wildfly:28.0.1.Final-jdk17
 
 COPY certs/server.keystore /opt/jboss/wildfly/domain/configuration
+COPY certs/server.crt /opt/jboss/wildfly/domain/configuration
 
 COPY hosts/host.xml /opt/jboss/wildfly/domain/configuration/host.xml
 COPY modules/postgresql /opt/jboss/wildfly/modules/org/postgresql/main
@@ -12,6 +13,8 @@ USER root
 RUN yum update -y && yum install -y vim less
 
 RUN chmod +x /opt/jboss/startup.sh
+
+RUN /opt/java/openjdk/bin/keytool -import -file /opt/jboss/wildfly/domain/configuration/server.crt -alias wildfly_domain -cacerts -storepass changeit -noprompt
 
 USER jboss
 
