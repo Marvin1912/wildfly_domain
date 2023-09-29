@@ -16,6 +16,9 @@ RUN chmod +x /opt/jboss/startup.sh
 
 RUN /opt/java/openjdk/bin/keytool -import -file /opt/jboss/wildfly/domain/configuration/server.crt -alias wildfly_domain -cacerts -storepass changeit -noprompt
 
+RUN mkdir -p /home/app/export /home/app/google
+RUN chown -R jboss /home/app
+
 USER jboss
 
 ENV HTTPS_PORT 8444

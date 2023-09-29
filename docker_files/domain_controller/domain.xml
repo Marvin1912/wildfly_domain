@@ -1835,6 +1835,9 @@
                     <https-listener name="https" socket-binding="https" ssl-context="domainSSLContext" enable-http2="true"/>
                     <host name="default-host" alias="localhost">
                         <location name="/" handler="welcome-content"/>
+                        <filter-ref name="Access-Control-Allow-Origin"/>
+                        <filter-ref name="Access-Control-Allow-Methods"/>
+                        <filter-ref name="Access-Control-Allow-Headers"/>
                         <http-invoker http-authentication-factory="application-http-authentication"/>
                     </host>
                 </server>
@@ -1848,6 +1851,11 @@
                 <application-security-domains>
                     <application-security-domain name="other" security-domain="ApplicationDomain"/>
                 </application-security-domains>
+                <filters>
+                    <response-header name="Access-Control-Allow-Origin" header-name="Access-Control-Allow-Origin" header-value="*"/>
+                    <response-header name="Access-Control-Allow-Methods" header-name="Access-Control-Allow-Methods" header-value="GET, POST"/>
+                    <response-header name="Access-Control-Allow-Headers" header-name="Access-Control-Allow-Headers" header-value="accept, authorization, content-type"/>
+                </filters>
             </subsystem>
             <subsystem xmlns="urn:jboss:domain:webservices:2.0" statistics-enabled="${wildfly.webservices.statistics-enabled:${wildfly.statistics-enabled:false}}">
                 <wsdl-host>${jboss.bind.address:127.0.0.1}</wsdl-host>

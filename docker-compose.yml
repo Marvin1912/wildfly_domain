@@ -40,6 +40,8 @@ services:
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "wildfly_domain"
       POSTGRES_HOST: postgres
+    volumes:
+      - "/home/marvin/google:/home/app/google"
     ports:
       - "8444:8444"
     restart: unless-stopped
@@ -56,6 +58,8 @@ services:
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "wildfly_domain"
       POSTGRES_HOST: postgres
+    volumes:
+      - "/home/marvin/google:/home/app/google"
     ports:
       - "8445:8445"
     restart: unless-stopped
