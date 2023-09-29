@@ -6,6 +6,8 @@ COPY certs/server.crt /opt/jboss/wildfly/domain/configuration
 COPY hosts/host.xml /opt/jboss/wildfly/domain/configuration/host.xml
 COPY modules/postgresql /opt/jboss/wildfly/modules/org/postgresql/main
 
+COPY modules/sun/jdk/module.xml /opt/jboss/wildfly/modules/system/layers/base/sun/jdk/main
+
 COPY startup.sh /opt/jboss/startup.sh
 
 USER root
