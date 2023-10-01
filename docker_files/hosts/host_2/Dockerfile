@@ -21,6 +21,8 @@ RUN /opt/java/openjdk/bin/keytool -import -file /opt/jboss/wildfly/domain/config
 RUN mkdir -p /home/app/export /home/app/google
 RUN chown -R jboss /home/app
 
+RUN ln -s /opt/jboss/wildfly/domain/servers/server/log logs
+
 USER jboss
 
 ENV HTTPS_PORT 8445
