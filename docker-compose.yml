@@ -148,6 +148,8 @@ services:
     image: localhost:5000/adapter_application:latest
     container_name: adapter_application
     hostname: adapter_application
+    volumes:
+      - "/home/marvin/camt:/app/camt"
     ports:
       - "9001:9001"
     restart: unless-stopped
