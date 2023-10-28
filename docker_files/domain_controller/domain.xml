@@ -1831,7 +1831,7 @@
                 <buffer-cache name="default"/>
                 <server name="default-server">
                     <ajp-listener name="ajp" socket-binding="ajp"/>
-                    <http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true"/>
+                    <http-listener name="default" socket-binding="http" redirect-socket="http" enable-http2="true"/>
                     <https-listener name="https" socket-binding="https" ssl-context="domainSSLContext" enable-http2="true"/>
                     <host name="default-host" alias="localhost">
                         <location name="/" handler="welcome-content"/>
@@ -2022,7 +2022,7 @@
                 <buffer-cache name="default"/>
                 <server name="default-server">
                     <http-listener name="management" socket-binding="mcmp-management" enable-http2="true"/>
-                    <https-listener name="https" socket-binding="https" ssl-context="domainSSLContext" enable-http2="true"/>
+                    <http-listener name="http" socket-binding="http" enable-http2="true"/>
                     <host name="default-host" alias="localhost">
                         <filter-ref name="load-balancer"/>
                     </host>

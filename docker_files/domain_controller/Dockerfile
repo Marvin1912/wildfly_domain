@@ -14,6 +14,8 @@ RUN yum update -y && yum install -y vim less
 
 RUN chmod +x /opt/jboss/startup.sh
 
+RUN ln -s /opt/jboss/wildfly/domain/servers/domain-controller/log logs
+
 USER jboss
 
 ENV HTTPS_PORT 8443
