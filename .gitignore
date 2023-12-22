@@ -38,3 +38,6 @@ wildfly_domain.iml
 # Gradle
 .gradle/
 build/
+
+# Draw IO
+*.dtmp
