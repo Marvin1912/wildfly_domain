@@ -38,7 +38,7 @@ _The certificate is purely for testing and does not contain any sensitive inform
 - Certificate -> Data -> Validity
 
 ### Local Docker Registry
-A local Docker registry runs on the server so that the images can be quickly distributed within the network. In order for the builds and pushes to work towards the insecure registry (no TLS), the following must be added to the respective system.
+A local Docker registry runs on the server so that the images can be quickly distributed within the network. In order for the builds and pushes to work towards the insecure registry (no TLS), the following must be added to the system which tries to push the images.
 <pre>
 /etc/docker/daemon.json
 
