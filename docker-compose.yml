@@ -154,6 +154,19 @@ services:
       - "9001:9001"
     restart: unless-stopped
 
+  homeassistant:
+    container_name: home_assistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - /opt/home_assistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+
 volumes:
   postgres_data:
   influxdb_data:
