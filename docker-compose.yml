@@ -138,6 +138,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: marvin
       GF_SECURITY_ADMIN_PASSWORD: password
+      GF_SECURITY_COOKIE_SAMESITE: none
+      GF_SECURITY_ALLOW_EMBEDDING: true  
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/datasources/:/etc/grafana/provisioning/datasources:ro
@@ -150,6 +152,7 @@ services:
     hostname: adapter_application
     volumes:
       - "/home/marvin/camt:/app/camt"
+      - "/home/marvin/import:/app/import"  
     ports:
       - "9001:9001"
     restart: unless-stopped
