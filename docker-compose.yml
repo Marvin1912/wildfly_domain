@@ -130,7 +130,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana-oss:10.1.1
+    image: grafana/grafana-oss:10.4.3
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -138,7 +138,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: marvin
       GF_SECURITY_ADMIN_PASSWORD: password
-      GF_SECURITY_COOKIE_SAMESITE: none
+      GF_SECURITY_COOKIE_SAMESITE: disabled
       GF_SECURITY_ALLOW_EMBEDDING: true  
     volumes:
       - grafana_data:/var/lib/grafana
