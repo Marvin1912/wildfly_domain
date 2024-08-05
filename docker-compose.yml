@@ -170,6 +170,18 @@ services:
     privileged: true
     network_mode: host
 
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    container_name: mosquitto
+    hostname: mosquitto
+    volumes:
+      - /opt/mosquitto:/mosquitto
+      - /opt/mosquitto/data:/mosquitto/data
+      - /opt/mosquitto/log:/mosquitto/log
+    ports:
+      - 1885:1883
+      - 9005:9001 
+
 volumes:
   postgres_data:
   influxdb_data:

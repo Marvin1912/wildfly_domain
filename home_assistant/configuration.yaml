@@ -41,3 +41,4 @@ influxdb:
     entity_globs:
       - sensor.lumi_lumi_weather_temperatur*
       - sensor.lumi_lumi_weather_luftfeuchtigkeit*
+      - sensor.tasmota*
