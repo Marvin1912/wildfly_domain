@@ -22,7 +22,11 @@ panel_iframe:
   frontend:
     title: "Frontend"
     url: "http://192.168.178.29:3001/"
-    icon: "mdi:abacus"  
+    icon: "mdi:abacus"
+  portfolio:
+    title: "Portfolio"
+    url: "http://192.168.178.29:5800/"
+    icon: "mdi:bitcoin"
 
 influxdb:
   api_version: 2
