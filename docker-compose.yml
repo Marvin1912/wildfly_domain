@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   db:
     image: "postgres:15.3"
@@ -13,75 +12,6 @@ services:
     ports:
       - "5432:5432"
     restart: unless-stopped
-
-  domain-controller:
-    image: localhost:5000/domain-controller:latest
-    container_name: "domain-controller"
-    hostname: "domain-controller"
-    environment:
-      POSTGRES_USER: "marvin"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "wildfly_domain"
-      POSTGRES_HOST: postgres
-    ports:
-      - "8081:8080"
-      - "8443:8443"
-      - "9991:9990"
-    restart: unless-stopped
-    depends_on:
-      - db
-
-  host-1:
-    image: localhost:5000/host-1:latest
-    container_name: "host-1"
-    hostname: "host-1"
-    environment:
-      POSTGRES_USER: "marvin"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "wildfly_domain"
-      POSTGRES_HOST: postgres
-    volumes:
-      - "/home/marvin/google:/home/app/google"
-    ports:
-      - "8444:8444"
-    restart: unless-stopped
-    depends_on:
-      - db
-      - domain-controller
-
-  host-2:
-    image: localhost:5000/host-2:latest
-    container_name: "host-2"
-    hostname: "host-2"
-    environment:
-      POSTGRES_USER: "marvin"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "wildfly_domain"
-      POSTGRES_HOST: postgres
-    volumes:
-      - "/home/marvin/google:/home/app/google"
-    ports:
-      - "8445:8445"
-    restart: unless-stopped
-    depends_on:
-      - db
-      - domain-controller
-
-  host-3:
-    image: localhost:5000/host-3:latest
-    container_name: "host-3"
-    hostname: "host-3"
-    environment:
-      POSTGRES_USER: "marvin"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "wildfly_domain"
-      POSTGRES_HOST: postgres
-    ports:
-      - "8446:8446"
-    restart: unless-stopped
-    depends_on:
-      - db
-      - domain-controller
 
   consul-server:
     image: hashicorp/consul:1.16
