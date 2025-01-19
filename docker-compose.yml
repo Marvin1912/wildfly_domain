@@ -84,13 +84,30 @@ services:
       IMPORTER_IN: /app/import
       IMPORTER_DONE: /app/import/done
       CAMT_DIRECTORY_IN: /app/camt
-      CAMT_DIRECTORY_DONE: /app/camt/done  
+      CAMT_DIRECTORY_DONE: /app/camt/done
+      DATA_SOURCE: jdbc:postgresql://192.168.178.29:5432/costs
+      DATA_SOURCE_USERNAME: marvin
+      DATA_SOURCE_PASSWORD: password
+      INFLUX_URL: http://192.168.178.29:8086
+      INFLUX_TOKEN: rmz5aaaKYSpgvXSO3C1UFZmXjvtpwI81b7hcMaMJJqOTjvgI82iNAbSsF7fpGIy2fduNDKACQ759cyaiECrulg==
+      CONSUL_URL: http://192.168.178.29:8500
+      EXPORTER_FOLDER: /app/export
+      UPLOADER_COST_EXPORT_FOLDER: /app/export
+      UPLOADER_CREDENTIALS_PATH: /app/google/credentials.json  
     volumes:
       - "/home/marvin/camt:/app/camt"
       - "/home/marvin/import:/app/import"  
     ports:
       - "9001:9001"
     restart: unless-stopped
+
+  frontend:
+    image: localhost:5000/frontend:latest
+    container_name: frontend
+    hostname: frontend
+    ports:
+      - "3001:80"
+    restart: unless-stopped  
 
   homeassistant:
     container_name: home_assistant
