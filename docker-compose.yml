@@ -93,7 +93,7 @@ services:
       CONSUL_URL: http://192.168.178.29:8500
       EXPORTER_FOLDER: /app/export
       UPLOADER_COST_EXPORT_FOLDER: /app/export
-      UPLOADER_CREDENTIALS_PATH: /app/google/credentials.json  
+      UPLOADER_CREDENTIALS_PATH: /app/google/credentials.json
     volumes:
       - "/home/marvin/camt:/app/camt"
       - "/home/marvin/import:/app/import"  
@@ -107,7 +107,7 @@ services:
     hostname: frontend
     ports:
       - "3001:80"
-    restart: unless-stopped  
+    restart: unless-stopped
 
   homeassistant:
     container_name: home_assistant
@@ -136,15 +136,16 @@ services:
       - 9005:9001 
 
   portfolio-performance:
-    image: quallenbezwinger/portfolio-performance:0.9
+    image: localhost:5000/portfolio:latest
     container_name: portfolio
-    restart: unless-stopped
+    restart: always
     ports:
-      - 5800:5800
+      - "5800:5800"
     volumes:
       - /opt/docker-volumes/pp/config:/config
       - /opt/docker-volumes/pp/workspace:/opt/portfolio/workspace
     environment:
+      KEEP_APP_RUNNING: 1
       USER_ID: 0
       GROUP_ID: 0
       DISPLAY_WIDTH: 1920
